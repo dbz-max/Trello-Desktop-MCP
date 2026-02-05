@@ -57,6 +57,20 @@ import {
   trelloGetBoardLabelsTool,
   handleTrelloGetBoardLabels
 } from './tools/advanced.js';
+import {
+  createChecklistTool,
+  handleCreateChecklist,
+  addChecklistItemTool,
+  handleAddChecklistItem,
+  updateChecklistItemTool,
+  handleUpdateChecklistItem,
+  deleteChecklistItemTool,
+  handleDeleteChecklistItem,
+  deleteChecklistTool,
+  handleDeleteChecklist,
+  updateChecklistTool,
+  handleUpdateChecklist
+} from './tools/checklists.js';
 
 export function createMCPServer() {
   const server = new Server(
@@ -116,7 +130,14 @@ export function createMCPServer() {
         trelloGetCardAttachmentsTool,
         trelloGetCardChecklistsTool,
         trelloGetBoardMembersTool,
-        trelloGetBoardLabelsTool
+        trelloGetBoardLabelsTool,
+        // Checklist management
+        createChecklistTool,
+        addChecklistItemTool,
+        updateChecklistItemTool,
+        deleteChecklistItemTool,
+        deleteChecklistTool,
+        updateChecklistTool
       ],
     };
   });
@@ -200,7 +221,26 @@ export function createMCPServer() {
       
       case 'trello_get_board_labels':
         return await handleTrelloGetBoardLabels(args);
-      
+
+      // Checklist management
+      case 'trello_create_checklist':
+        return await handleCreateChecklist(args);
+
+      case 'trello_add_checklist_item':
+        return await handleAddChecklistItem(args);
+
+      case 'trello_update_checklist_item':
+        return await handleUpdateChecklistItem(args);
+
+      case 'trello_delete_checklist_item':
+        return await handleDeleteChecklistItem(args);
+
+      case 'trello_delete_checklist':
+        return await handleDeleteChecklist(args);
+
+      case 'trello_update_checklist':
+        return await handleUpdateChecklist(args);
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
