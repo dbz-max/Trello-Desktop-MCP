@@ -55,7 +55,9 @@ import {
   trelloGetBoardMembersTool,
   handleTrelloGetBoardMembers,
   trelloGetBoardLabelsTool,
-  handleTrelloGetBoardLabels
+  handleTrelloGetBoardLabels,
+  trelloGetBoardCustomFieldsTool,
+  handleTrelloGetBoardCustomFields
 } from './tools/advanced.js';
 import {
   createChecklistTool,
@@ -131,6 +133,7 @@ export function createMCPServer() {
         trelloGetCardChecklistsTool,
         trelloGetBoardMembersTool,
         trelloGetBoardLabelsTool,
+        trelloGetBoardCustomFieldsTool,
         // Checklist management
         createChecklistTool,
         addChecklistItemTool,
@@ -221,6 +224,9 @@ export function createMCPServer() {
       
       case 'trello_get_board_labels':
         return await handleTrelloGetBoardLabels(args);
+
+      case 'trello_get_board_custom_fields':
+        return await handleTrelloGetBoardCustomFields(args);
 
       // Checklist management
       case 'trello_create_checklist':

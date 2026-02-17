@@ -2,12 +2,11 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { 
-  CallToolRequestSchema, 
+import {
+  CallToolRequestSchema,
   ListToolsRequestSchema,
-  InitializeRequestSchema,
   ListResourcesRequestSchema,
-  ListPromptsRequestSchema 
+  ListPromptsRequestSchema
 } from '@modelcontextprotocol/sdk/types.js';
 
 // Desktop-specific: Check for local credentials
@@ -105,22 +104,6 @@ const server = new Server(
     },
   }
 );
-
-// Initialize handler
-server.setRequestHandler(InitializeRequestSchema, async () => {
-  return {
-    protocolVersion: '2024-11-05',
-    capabilities: {
-      tools: {},
-      resources: {},
-      prompts: {}
-    },
-    serverInfo: {
-      name: 'trello-mcp-desktop',
-      version: '1.0.0'
-    }
-  };
-});
 
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {

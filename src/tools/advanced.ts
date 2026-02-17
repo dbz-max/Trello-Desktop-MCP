@@ -67,7 +67,17 @@ const validateGetBoardLabels = (args: unknown) => {
     token: z.string().min(1, 'Token is required'),
     boardId: z.string().regex(/^[a-f0-9]{24}$/, 'Invalid board ID format')
   });
-  
+
+  return schema.parse(args);
+};
+
+const validateGetBoardCustomFields = (args: unknown) => {
+  const schema = z.object({
+    apiKey: z.string().min(1, 'API key is required'),
+    token: z.string().min(1, 'Token is required'),
+    boardId: z.string().regex(/^[a-f0-9]{24}$/, 'Invalid board ID format')
+  });
+
   return schema.parse(args);
 };
 
@@ -155,6 +165,12 @@ export async function handleTrelloGetBoardCards(args: unknown) {
           url: attachment.url,
           mimeType: attachment.mimeType,
           date: attachment.date
+        })) || [],
+        customFieldItems: card.customFieldItems?.map((item: any) => ({
+          id: item.id,
+          idCustomField: item.idCustomField,
+          idValue: item.idValue,  // For dropdown/list type custom fields
+          value: item.value
         })) || []
       })),
       rateLimit: response.rateLimit
@@ -571,10 +587,10 @@ export async function handleTrelloGetBoardLabels(args: unknown) {
   try {
     const { apiKey, token, boardId } = validateGetBoardLabels(args);
     const client = new TrelloClient({ apiKey, token });
-    
+
     const response = await client.getBoardLabels(boardId);
     const labels = response.data;
-    
+
     const result = {
       summary: `Found ${labels.length} label(s) on board`,
       boardId,
@@ -586,7 +602,7 @@ export async function handleTrelloGetBoardLabels(args: unknown) {
       })),
       rateLimit: response.rateLimit
     };
-    
+
     return {
       content: [
         {
@@ -596,17 +612,93 @@ export async function handleTrelloGetBoardLabels(args: unknown) {
       ]
     };
   } catch (error) {
-    const errorMessage = error instanceof z.ZodError 
+    const errorMessage = error instanceof z.ZodError
       ? formatValidationError(error)
-      : error instanceof Error 
-        ? error.message 
+      : error instanceof Error
+        ? error.message
         : 'Unknown error occurred';
-        
+
     return {
       content: [
         {
           type: 'text' as const,
           text: `Error getting board labels: ${errorMessage}`
+        }
+      ],
+      isError: true
+    };
+  }
+}
+
+export const trelloGetBoardCustomFieldsTool: Tool = {
+  name: 'trello_get_board_custom_fields',
+  description: 'Get all custom field definitions for a Trello board. Use this to understand what custom fields exist (like ARR, Sites, etc.) and map their IDs to names.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      apiKey: {
+        type: 'string',
+        description: 'Trello API key (automatically provided by Claude.app from your stored credentials)'
+      },
+      token: {
+        type: 'string',
+        description: 'Trello API token (automatically provided by Claude.app from your stored credentials)'
+      },
+      boardId: {
+        type: 'string',
+        description: 'ID of the board to get custom fields for',
+        pattern: '^[a-f0-9]{24}$'
+      }
+    },
+    required: ['apiKey', 'token', 'boardId']
+  }
+};
+
+export async function handleTrelloGetBoardCustomFields(args: unknown) {
+  try {
+    const { apiKey, token, boardId } = validateGetBoardCustomFields(args);
+    const client = new TrelloClient({ apiKey, token });
+
+    const response = await client.getBoardCustomFields(boardId);
+    const customFields = response.data;
+
+    const result = {
+      summary: `Found ${customFields.length} custom field(s) on board`,
+      boardId,
+      customFields: customFields.map((field: any) => ({
+        id: field.id,
+        name: field.name,
+        type: field.type,
+        position: field.pos,
+        options: field.options?.map((opt: any) => ({
+          id: opt.id,
+          value: opt.value?.text,
+          color: opt.color
+        })) || []
+      })),
+      rateLimit: response.rateLimit
+    };
+
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: JSON.stringify(result, null, 2)
+        }
+      ]
+    };
+  } catch (error) {
+    const errorMessage = error instanceof z.ZodError
+      ? formatValidationError(error)
+      : error instanceof Error
+        ? error.message
+        : 'Unknown error occurred';
+
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: `Error getting board custom fields: ${errorMessage}`
         }
       ],
       isError: true

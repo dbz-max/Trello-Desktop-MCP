@@ -412,7 +412,14 @@ export async function handleGetCard(args: unknown) {
             checkItemsChecked: card.badges.checkItemsChecked,
             description: card.badges.description
           } : undefined
-        })
+        }),
+        // Always include custom field items if present
+        customFieldItems: card.customFieldItems?.map(item => ({
+          id: item.id,
+          idCustomField: item.idCustomField,
+          idValue: item.idValue,  // For dropdown/list type custom fields
+          value: item.value
+        })) || []
       },
       rateLimit: response.rateLimit
     };

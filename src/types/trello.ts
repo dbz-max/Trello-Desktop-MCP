@@ -52,6 +52,7 @@ export interface TrelloCard {
   members: TrelloMember[];
   checklists: TrelloChecklist[];
   attachments?: TrelloAttachment[];
+  customFieldItems?: TrelloCustomFieldItem[];
   badges: {
     votes: number;
     viewingMemberVoted: boolean;
@@ -115,6 +116,39 @@ export interface TrelloAttachment {
     width: number;
     height: number;
     url: string;
+  }[];
+}
+
+export interface TrelloCustomFieldItem {
+  id: string;
+  idCustomField: string;
+  idModel: string;
+  modelType: 'card';
+  idValue?: string;  // For dropdown/list type custom fields (top-level)
+  value?: {
+    text?: string;
+    number?: string;
+    checked?: string;
+    date?: string;
+  };
+}
+
+export interface TrelloCustomField {
+  id: string;
+  idModel: string;
+  modelType: 'board';
+  fieldGroup: string;
+  name: string;
+  type: 'text' | 'number' | 'checkbox' | 'date' | 'list';
+  pos: number;
+  options?: {
+    id: string;
+    idCustomField: string;
+    value: {
+      text: string;
+    };
+    color: string;
+    pos: number;
   }[];
 }
 

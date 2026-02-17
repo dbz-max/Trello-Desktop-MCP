@@ -353,14 +353,16 @@ export class TrelloClient {
   }
 
   async getCard(cardId: string, includeDetails = false): Promise<TrelloApiResponse<TrelloCard>> {
-    const params: Record<string, string> = {};
+    const params: Record<string, string> = {
+      customFieldItems: 'true'  // Always fetch custom fields
+    };
     if (includeDetails) {
       params.members = 'true';
       params.labels = 'true';
       params.checklists = 'all';
       params.badges = 'true';
     }
-    
+
     return this.makeRequest<TrelloCard>(
       `/cards/${cardId}`,
       { params },
@@ -389,6 +391,14 @@ export class TrelloClient {
       `/boards/${boardId}/labels`,
       {},
       `Get board ${boardId} labels`
+    );
+  }
+
+  async getBoardCustomFields(boardId: string): Promise<TrelloApiResponse<any[]>> {
+    return this.makeRequest<any[]>(
+      `/boards/${boardId}/customFields`,
+      {},
+      `Get board ${boardId} custom fields`
     );
   }
 
@@ -508,9 +518,12 @@ export class TrelloClient {
     attachments?: string;
     members?: string;
     filter?: string;
+    customFieldItems?: boolean;
   }): Promise<TrelloApiResponse<TrelloCard[]>> {
-    const params: Record<string, string> = {};
-    
+    const params: Record<string, string> = {
+      customFieldItems: 'true'  // Always fetch custom fields
+    };
+
     if (options?.attachments) {
       params.attachments = options.attachments;
     }
@@ -520,7 +533,7 @@ export class TrelloClient {
     if (options?.filter) {
       params.filter = options.filter;
     }
-    
+
     return this.makeRequest<TrelloCard[]>(
       `/boards/${boardId}/cards`,
       { params },
